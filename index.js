@@ -6,8 +6,7 @@ const app = express();
 const mysql = require('mysql');
 const restart = require('./restart');
 const reload = require('./reload');
-
-let maiMenu = {
+let mainMenu = {
     "one_time": false,
     "buttons": [
         [{
@@ -21,7 +20,48 @@ let maiMenu = {
         ]
     ]
 }
-let mainMenu = JSON.stringify(maiMenu);
+let letyshopsButton = {
+    "inline": true,
+    "one_time": false,
+    "buttons": [
+        [{
+            "action": {
+                "type": "open_link",
+                // "payload": "{\"button\": \"1\"}",
+                "link": "https://letyshops.com/soc/sh-1?r=547551",
+                "label": "Вернуть часть денег с покупки",
+            }, "color": "positive",
+
+        }
+        ]
+    ]
+}
+let errorButtons = {
+    "inline": true,
+    "one_time": false,
+    "buttons": [
+        [{
+            "action": {
+                "type": "text",
+                "payload": "{\"button\": \"1\"}",
+                "label": "Мой список отслеживания"
+            },
+
+        },], [{
+            "action": {
+                "type": "open_link",
+                // "payload": "{\"button\": \"1\"}",
+                "link": "https://letyshops.com/soc/sh-1?r=547551",
+                "label": "Вернуть часть денег с покупки"
+            },
+
+        }
+        ]
+    ]
+}
+mainMenu = JSON.stringify(mainMenu);
+errorButtons = JSON.stringify(errorButtons);
+letyshopsButton = JSON.stringify(letyshopsButton);
 
 
 
@@ -41,7 +81,7 @@ easyvk({
 
         connection.on('message_new', (msg) => {
 
-            //console.log(msg);
+            console.log(msg);
             let car;
             try {
                 car = msg.client_info.carousel;
@@ -130,7 +170,7 @@ easyvk({
                                     "type": "text",
                                     "label": "Удалить",
                                     "payload": `{"button": "${e.id}"}`,
-                                }, "color": "negative",
+                                },// "color": "positive",
                             },
                             {
                                 "action": {
@@ -176,6 +216,7 @@ easyvk({
                             user_id: msg.from_id,
                             random_id: easyvk.randomId(),
                             dont_parse_links: 1,
+                            keyboard: letyshopsButton,
                         }, 'post')
                     }
 
@@ -256,7 +297,8 @@ easyvk({
                     message: `Я таких слов не знаю, пришлите мне ссылку на странцу товара, и я буду следить за изменением цены`,
                     user_id: msg.from_id,
                     random_id: easyvk.randomId(),
-                    keyboard: mainMenu,
+                    keyboard: errorButtons,
+
 
                 }, 'post');
             }

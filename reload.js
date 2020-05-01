@@ -7,7 +7,31 @@ const jsdom = require('jsdom');
 const request = require('request');
 const { JSDOM } = jsdom;
 
+function itemButton(link, id) {
+    return {
+        "inline": true,
+        "one_time": false,
+        "buttons": [
+            [{
+                "action": {
+                    "type": "text",
+                    "label": "Удалить",
+                    "payload": `{"button": "${id}"}`,
+                },
 
+            }, {
+                "action": {
+                    "type": "open_link",
+                    // "payload": "{\"button\": \"1\"}",
+                    "link": link,
+                    "label": "Открыть"
+                },
+
+            }
+            ]
+        ]
+    }
+}
 
 
 async function getSelector(site) {
@@ -81,6 +105,7 @@ async function reload() {
 
         allLinks.forEach(e => {
             let price = '';
+            let changeMenuButton = JSON.stringify(itemButton(e.link, e.id));
 
             if (e.new_price) {
 
@@ -90,6 +115,9 @@ async function reload() {
                     getSelector(e.site).then((selectors) => {
 
                         const dom = new JSDOM(body);
+
+
+
 
                         try {
                             if (selectors[0].meta_price == "content") {
@@ -104,8 +132,9 @@ async function reload() {
                                 price = dom.window.document.querySelector(selectors[0].new_price).innerHTML;
                             }
 
-                            price = price.replace(/[,.]\d./, " "); // почка или запятая, после которой цифра и любой знак удаляются (убираем копейки)
-                            price = price.replace(/\s\d+/g, "");   // пробел  и цифры после него удаляются 
+                            price = price.replace(/^\D+/g, "") //все не цифры в начале строки удаляем
+                            price = price.replace(/[,. ].+/, " "); // удаляем всё после точки  запятой или пробела
+
                             price = price.replace(/\D+/g, "");//оставляем только цифры
 
                         } catch (error) {
@@ -129,22 +158,27 @@ async function reload() {
 
 
                                 vk.call("messages.send", {
-                                    message: `К сожалению ${e.title} больше не продается \n ${e.link}`,
+                                    message: `К сожалению ${e.title} больше не продается`,
                                     user_id: e.user_id,
                                     random_id: easyvk.randomId(),
 
+                                    keyboard: changeMenuButton,
+
+
                                 }, 'post');
                             }
-                        }
+                        } if (price == '') console.log("Цена обнулилась при перескане " + e.site);
 
 
                     }).then(() => {
 
                         if (e.new_price == price || !price) { } else {
                             vk.call("messages.send", {
-                                message: `Отличные новости! ${e.title} теперь стоит ${price}₽ вместо ${e.new_price}₽. \n ${e.link}`,
+                                message: `Отличные новости! ${e.title} теперь стоит ${price}₽ вместо ${e.new_price}₽.`,
                                 user_id: e.user_id,
                                 random_id: easyvk.randomId(),
+
+                                keyboard: changeMenuButton,
 
                             }, 'post');
 

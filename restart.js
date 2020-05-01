@@ -6,7 +6,7 @@ const { JSDOM } = jsdom;
 const mysql = require('mysql');
 
 
-function restart(site, title, new_price, meta_title, meta_price) {
+function restart(site, title, new_price, meta_title = '', meta_price = '') {
     let genPromise = new Promise(function (resolve, reject) {
 
 
