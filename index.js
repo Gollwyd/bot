@@ -30,7 +30,7 @@ let letyshopsButton = {
                 // "payload": "{\"button\": \"1\"}",
                 "link": "https://letyshops.com/soc/sh-1?r=547551",
                 "label": "Вернуть часть денег с покупки",
-            }, "color": "positive",
+            },
 
         }
         ]
