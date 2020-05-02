@@ -38,9 +38,11 @@ async function getSite(site) {
 
 function getPrice(link, id, user_id ) {
 let promise = new Promise(function (resolve, reject) {
-
+   
     request(link, (err, res, body) => {
-        if (err) { console.log(err); return; }
+        
+        if (err) { console.log(err); reject("C этим сойтом мы не умеем работать =("); return;  }
+        
         const url  = new URL(link);
         const site = url.hostname;
         console.log(site);
@@ -75,7 +77,7 @@ let promise = new Promise(function (resolve, reject) {
            } catch (error) { 
               
               console.log('Старый магаз шалит или ссылка гной'+site); 
-               resolve(`Мы знакомы ${site}, но что-то не так (возможно ссылка не одна, или она ведет не на страницу с товаром). Попробуем разобраться`);
+               resolve(`Мы знакомы ${site}, но что-то не так (возможно ссылка не одна, или она ведет не на страницу с товаром). Попробуем разобраться.`);
         
         }
         
@@ -91,8 +93,10 @@ let promise = new Promise(function (resolve, reject) {
                 });
                 resolve(`Мы еще не работали с ${site}, но через пару дней начнем отслеживание. Вашу ссылку мы сохранили`);
         }
-        price = price.replace(/^\D+/g, "") //все не цифры в начале строки удаляем
-        price = price.replace(/[,. ].+/, " "); // удаляем всё после точки  запятой или пробела
+        price = price.replace(/^\D+/, ""); //все не цифры в начале строки удаляем
+        price = price.replace(/[,.].+/, ""); // удаляем всё после точки  запятой или пробела
+        price = price.replace(/![\d ].+/, ""); // удаляем всё после точки  запятой или пробела
+        price = price.replace(/\D/g, "");
         
         price = price.replace(/\D+/g, "");//оставляем только цифры
 
@@ -114,7 +118,7 @@ let promise = new Promise(function (resolve, reject) {
 
 
         addLink(link, price, title,  id, user_id);
-        resolve(`${title} стоимостью ${price}₽ из магазина ${site}`);    
+        resolve(`${title} стоимостью ${price} ₽ из магазина ${site} теперь отслеживается.`);    
         function addLink(link, price, title,  id, user_id) {
             const connection = mysql.createConnection({
                 host: "localhost",

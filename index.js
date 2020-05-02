@@ -81,7 +81,7 @@ easyvk({
 
         connection.on('message_new', (msg) => {
 
-            console.log(msg);
+            //console.log(msg);
             let car;
             try {
                 car = msg.client_info.carousel;
@@ -97,6 +97,7 @@ easyvk({
             } catch (error) {
                 link = msg.text;
             }
+            if (link.match(/:\/\/m\./)) { link = link.replace(/:\/\/m\./, ":\/\/"); }
 
             if (msg.payload && msg.payload == '{"command":"start"}') {
                 vk.call("messages.send", {
@@ -111,7 +112,7 @@ easyvk({
 
 
 
-            } else if (msg.payload && Number(msg.payload.replace(/\D+/g, "")) > 50) {
+            } else if (msg.payload && Number(msg.payload.replace(/\D+/g, "")) > 40) {
                 let promise = new Promise(function (resolve, reject) {
                     const connection = mysql.createConnection({
                         host: "localhost",
@@ -158,8 +159,8 @@ easyvk({
                     results.forEach(e => {
 
                         let element = {
-                            "title": e.title,
-                            "description": `Текущая стоимость ${e.new_price}₽ в магазине ${e.site}`,
+                            "title": e.title || '«Скоро мы начнем отслеживание»',
+                            "description": `Текущая стоимость ${e.new_price} ₽ в магазине ${e.site}`,
                             "action": {
                                 "type": "open_link",
                                 "link": e.link,
@@ -181,7 +182,7 @@ easyvk({
                             }]
                         }
                         elements.push(element);
-                        desktopLinks.push("\n" + e.title + " — " + e.new_price + "₽");
+                        desktopLinks.push("\n" + e.title + " — " + e.new_price + " ₽");
                         desktopLinks.push(e.link);
 
                     });
@@ -236,10 +237,18 @@ easyvk({
                 getPrice(link, msg.id, msg.from_id).then((res) =>
 
                     vk.call("messages.send", {
-                        message: res + " в списке покупок!\n Будем держать Вас в курсе изменений.",
+                        message: res + "\nБудем держать Вас в курсе изменений.",
                         user_id: msg.from_id,
                         random_id: easyvk.randomId(),
-                        dont_parse_links: 1
+                        dont_parse_links: 1,
+                        keyboard: mainMenu,
+                    }), (mistake) =>
+
+                    vk.call("messages.send", {
+                        message: mistake,
+                        user_id: msg.from_id,
+                        random_id: easyvk.randomId(),
+
                     }))
             } else if (link.match(/newSite/g)) {
 
@@ -259,7 +268,7 @@ easyvk({
                         getPrice(e.link, e.id, e.user_id).then((res) => {
 
                             vk.call("messages.send", {
-                                message: res + " теперь отслеживается.\n Будем держать Вас в курсе изменений",
+                                message: res + "\nБудем держать Вас в курсе изменений",
                                 user_id: e.user_id,
                                 random_id: easyvk.randomId(),
                                 dont_parse_links: 1
@@ -292,6 +301,9 @@ easyvk({
                         random_id: easyvk.randomId(),
                         dont_parse_links: 1
                     }))
+            } else if (!link) {
+
+
             } else {
                 vk.call("messages.send", {
                     message: `Я таких слов не знаю, пришлите мне ссылку на странцу товара, и я буду следить за изменением цены`,
