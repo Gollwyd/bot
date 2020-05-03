@@ -6,6 +6,7 @@ const mysql = require('mysql');
 const jsdom = require('jsdom');
 const request = require('request');
 const { JSDOM } = jsdom;
+const myRequest = require('./myRequest');
 
 function itemButton(link, id) {
     return {

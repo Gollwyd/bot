@@ -6,6 +6,8 @@ const app = express();
 const mysql = require('mysql');
 const restart = require('./restart');
 const reload = require('./reload');
+const myRequest = require('./myRequest');
+
 let mainMenu = {
     "one_time": false,
     "buttons": [
@@ -101,7 +103,7 @@ easyvk({
 
             if (msg.payload && msg.payload == '{"command":"start"}') {
                 vk.call("messages.send", {
-                    message: `Привет! \n Пришли мне ссылку на страницу из интрнет-магазина с вещью, которую хочешь купить. 
+                    message: `Привет! \n Пришли мне ссылку на страницу из интернет-магазина с вещью, которую хочешь купить. 
                     Мы будем отслеживать стоимость и сообщим, когда продавцы снизят цену\n 
                     P.S. В магазинах одежды каждые три масяца распродажи.`,
                     user_id: msg.from_id,
@@ -187,26 +189,27 @@ easyvk({
 
                     });
                     if (!results.length) { desktopLinks.push("Список пуст"); };
-
-                    let mes = `Вещи из Вашего списка`
-                    while (elements.length > 0 && car) {
-
-                        setInterval(() => { }, 100);
-
-                        vk.call("messages.send", {
-                            message: mes,
-                            user_id: msg.from_id,
-                            random_id: easyvk.randomId(),
-                            template: JSON.stringify({
-                                "type": "carousel",
-                                "elements": elements.splice(0, 10),
-                            }),
-
-                        }, 'post')
-
-                        mes = 'Вот еще ...';
+                    let intervalID = setInterval(carusMess, 100);
+                    let mes = `Товары из Вашего списка`;
+                    function carusMess() {
+                        if (elements.length > 0 && car) {
 
 
+
+                            vk.call("messages.send", {
+                                message: mes,
+                                user_id: msg.from_id,
+                                random_id: easyvk.randomId(),
+                                template: JSON.stringify({
+                                    "type": "carousel",
+                                    "elements": elements.splice(0, 10),
+                                }),
+
+                            }, 'post')
+
+                            mes = 'Вот еще ...';
+
+                        } else { clearInterval(intervalID); }
                     }
 
 

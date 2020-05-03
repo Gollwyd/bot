@@ -4,6 +4,7 @@ const path = require('path');
 const jsdom = require('jsdom');
 const { JSDOM } = jsdom;
 const mysql = require('mysql');
+const myRequest = require('./myRequest');
 
 
 function restart(site, title, new_price, meta_title = '', meta_price = '') {

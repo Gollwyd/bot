@@ -4,6 +4,7 @@ const path = require('path');
 const jsdom = require('jsdom');
 const { JSDOM } = jsdom;
 const mysql = require('mysql');
+const myRequest = require('./myRequest');
 
 
 async function getSite(site) {
@@ -39,12 +40,17 @@ async function getSite(site) {
 function getPrice(link, id, user_id ) {
 let promise = new Promise(function (resolve, reject) {
    
+    
+      
+
+   
     request(link, (err, res, body) => {
         
         if (err) { console.log(err); reject("C этим сойтом мы не умеем работать =("); return;  }
         
         const url  = new URL(link);
         const site = url.hostname;
+       // if (site == "api.admitad.com") {console.log(body); return;}
         console.log(site);
         const dom = new JSDOM(body);
         let price ="";
@@ -57,12 +63,10 @@ let promise = new Promise(function (resolve, reject) {
                     price = dom.window.document.querySelector(selectors[0].new_price).content;
                 } else if(selectors[0].meta_price == "text"){
                     let reg = new  RegExp(`${selectors[0].new_price}...............`);
-                   
                     let preprice=body.match(reg)|| [];
                     price = preprice[0];
                     console.log(price);
                     
-
                 } else {
                     price = dom.window.document.querySelector(selectors[0].new_price).innerHTML;
                 }
@@ -98,8 +102,6 @@ let promise = new Promise(function (resolve, reject) {
         price = price.replace(/![\d ].+/, ""); // удаляем всё после точки  запятой или пробела
         price = price.replace(/\D/g, "");
         
-        price = price.replace(/\D+/g, "");//оставляем только цифры
-
         title = title.replace(/[,|—].*/g, ''); // удаляем всё после запятой вместе с запятой, даже если нет ничего после запятой
         title = title.replace(/( - ).*/g, ''); // удаляем всё после дефиса отбитого пробелами
         title = title.replace(/[\r\n]+/g, '');
@@ -133,12 +135,8 @@ let promise = new Promise(function (resolve, reject) {
             
             });
             connection.end();
-
         }
-        });
-
-        
-
+        });  
         
     });
 })
@@ -146,6 +144,15 @@ return promise;
 }
 
 module.exports = getPrice;
+
+
+
+
+
+
+
+
+
 
 
 
